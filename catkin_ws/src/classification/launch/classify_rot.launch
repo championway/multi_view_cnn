@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+	<node name="classify_rot" pkg="object_classification" type="classify_rot.py"  output="screen" clear_params="true" required="true"/>
+</launch>

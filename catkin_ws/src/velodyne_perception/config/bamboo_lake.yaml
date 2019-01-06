@@ -1,0 +1,13 @@
+gps_left_up: [24.788960, 121.000267]
+gps_left_down: [24.788510, 120.999970]
+gps_right_up: [24.788500, 121.0008500]
+gps_right_down: [24.788353, 121.000470]
+
+range_min : 0.0
+range_max : 30.0
+angle_min : -180.0
+angle_max : 180.0
+z_min : -1.5
+z_max : 5.0
+y_min : 3.5
+x_min : 1.8

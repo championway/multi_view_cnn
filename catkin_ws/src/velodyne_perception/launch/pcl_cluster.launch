@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+	<arg name="visual" default="true"/>
+    <!-- PointCloud Cluster -->
+    <node name="pcl_cluster" pkg="velodyne_perception" type="pcl_cluster"  output="screen" clear_params="true" required="true">
+    	<param name="visual" value="$(arg visual)"/>
+    </node>
+</launch>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+	<include file="$(find image_roi_extraction)/launch/camera_lidar_roi.launch"></include>
+
+	<node name="classify_6_channels" pkg="object_classification" type="classify_6_channels.py"  output="screen" clear_params="true" required="true"/>
+</launch>

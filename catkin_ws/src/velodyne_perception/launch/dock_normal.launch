@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+    <!-- PointCloud Cluster -->
+    <node name="dock_normal" pkg="velodyne_perception" type="dock_normal"  output="screen" clear_params="true" required="true">
+        <param name="visual" value="$(arg visual)"/>
+    </node>
+</launch>
