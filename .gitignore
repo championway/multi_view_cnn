@@ -13,3 +13,4 @@ catkin_ws/.catkin_workspace
 *.vscode
 *.caffemodel
 *.pth
+.ipynb_checkpoints/
