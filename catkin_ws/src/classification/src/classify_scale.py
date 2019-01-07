@@ -66,7 +66,7 @@ class classify():
 		# Get the position of caffemodel folder
 		# ***************************************************************
 		#self.model_name = rospy.get_param('~model_name')
-		model_name = "robotx_ch3_epoch25"
+		model_name = "robotx_ch3_epoch25_scale"
 		rospy.loginfo('[%s] model name = %s' %(self.node_name, model_name))
 		rospack = rospkg.RosPack()
 		model_path = rospack.get_path('classification') + '/model/' + model_name + '.pth'
@@ -89,12 +89,12 @@ class classify():
 			transforms.ToTensor(), \
 			transforms.Normalize(mean=[0.485, 0.456, 0.406], \
                                  std=[0.229, 0.224, 0.225])])
-		self.model = torchvision.models.alexnet(pretrained = False)
-		self.model.classifier[6] = nn.Linear(4096, 4)
-		self.model = self.model.cuda()
-		#base_model = torchvision.models.alexnet(pretrained = False)
-		#self.model = MultiViewNet(base_model, 4)
+		#self.model = torchvision.models.alexnet(pretrained = False)
+		#self.model.classifier[6] = nn.Linear(4096, 4)
 		#self.model = self.model.cuda()
+		base_model = torchvision.models.alexnet(pretrained = False)
+		self.model = MultiViewNet(base_model, 4)
+		self.model = self.model.cuda()
 		self.model.load_state_dict(torch.load(model_path))
 		print(self.model)
 		#self.model =  torch.load(model_path)
@@ -206,14 +206,14 @@ class classify():
 		# ***************************************************************
 		# Using Pytorch Model to do prediction
 		# ***************************************************************
-		#scale_tensor = [torch.FloatTensor([[i]]).cuda() for i in self.scale]
+		scale_tensor = [torch.FloatTensor([[i]]).cuda() for i in self.scale]
 		#cv_img = cv2.resize(self.image, self.dim)
 		pil_img = Image.fromarray(self.image.astype('uint8'))
 		torch_img = self.data_transform(pil_img)
 		torch_img = np.expand_dims(torch_img, axis=0)
 		input_data = torch.tensor(torch_img).type('torch.FloatTensor').cuda()
 		t_start = time.clock()
-		output = self.model(input_data)
+		output = self.model(input_data, scale_tensor)
 		pred_y = int(torch.max(output, 1)[1].cpu().data.numpy())
 		#print "prediction time taken = ", time.clock() - t_start
 		#print "Predict: ", self.labels[output_max_class]

@@ -1,0 +1,10 @@
+blue_circle
+blue_cross
+blue_triangle
+green_circle
+green_cross
+green_triangle
+red_circle
+red_cross
+red_triangle
+background

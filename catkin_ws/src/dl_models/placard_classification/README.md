@@ -1,0 +1,1 @@
+- Download all model packages about placard classification from https://drive.google.com/drive/u/1/folders/1TzbgnAQ1dZxPhZvJ0iRJgUQM2WbHhPWZ

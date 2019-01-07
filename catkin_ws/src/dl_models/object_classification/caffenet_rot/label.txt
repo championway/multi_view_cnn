@@ -1,0 +1,4 @@
+buoy
+dock
+totem
+light_buoy

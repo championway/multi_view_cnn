@@ -1,0 +1,4 @@
+blue_circle
+green_triangle
+red_cross
+background

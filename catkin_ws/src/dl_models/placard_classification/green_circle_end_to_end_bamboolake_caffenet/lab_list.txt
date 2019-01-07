@@ -1,0 +1,3 @@
+turn_right
+go_straight
+turn_left
