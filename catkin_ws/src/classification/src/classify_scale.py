@@ -60,13 +60,15 @@ class classify():
 		self.point_size = 4	# must be integer
 		self.image = np.zeros((int(self.height), int(self.width), 3), np.uint8)
 		self.scale = []
+		self.count = 0
+		self.t_sum = 0.
 		#self.index = 0
 
 		# ***************************************************************
 		# Get the position of caffemodel folder
 		# ***************************************************************
 		#self.model_name = rospy.get_param('~model_name')
-		model_name = "robotx_ch3_epoch25_scale"
+		model_name = "robotx_ch3_epoch45_scale"
 		rospy.loginfo('[%s] model name = %s' %(self.node_name, model_name))
 		rospack = rospkg.RosPack()
 		model_path = rospack.get_path('classification') + '/model/' + model_name + '.pth'
@@ -206,7 +208,7 @@ class classify():
 		# ***************************************************************
 		# Using Pytorch Model to do prediction
 		# ***************************************************************
-		scale_tensor = [torch.FloatTensor([[i]]).cuda() for i in self.scale]
+		scale_tensor = [torch.FloatTensor([[math.log(i)*2]]).cuda() for i in self.scale]
 		#cv_img = cv2.resize(self.image, self.dim)
 		pil_img = Image.fromarray(self.image.astype('uint8'))
 		torch_img = self.data_transform(pil_img)
@@ -215,7 +217,11 @@ class classify():
 		t_start = time.clock()
 		output = self.model(input_data, scale_tensor)
 		pred_y = int(torch.max(output, 1)[1].cpu().data.numpy())
-		#print "prediction time taken = ", time.clock() - t_start
+		t_duration = time.clock() - t_start
+		self.t_sum += t_duration
+		self.count += 1
+		print(self.count)
+		print "prediction time taken = ", t_duration/self.count
 		#print "Predict: ", self.labels[output_max_class]
 		#print output_prob[output_max_class]
 		#if output_prob[output_max_class]<0.7:

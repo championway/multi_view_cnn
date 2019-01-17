@@ -9,6 +9,8 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_ros
   robotx_msgs
   roscpp
+  gazebo_ros
+  gazebo_msgs
   rospy
   sensor_msgs
   std_msgs
@@ -53,3 +55,9 @@ target_link_libraries(dock_normal ${catkin_LIBRARIES})
 
 add_executable(pcl_preprocessing_rviz src/pcl_preprocessing_rviz.cpp)
 target_link_libraries(pcl_preprocessing_rviz ${catkin_LIBRARIES})
+
+add_executable(test_pcd src/test_pcd.cpp)
+target_link_libraries(test_pcd ${catkin_LIBRARIES})
+
+add_executable(auto_labeling src/auto_labeling.cpp)
+target_link_libraries(auto_labeling ${catkin_LIBRARIES})

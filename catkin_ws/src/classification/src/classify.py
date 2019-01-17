@@ -60,6 +60,8 @@ class classify():
 		self.point_size = 4	# must be integer
 		self.image = np.zeros((int(self.height), int(self.width), 3), np.uint8)
 		self.scale = []
+		self.count = 0
+		self.t_sum = 0.
 		#self.index = 0
 
 		# ***************************************************************
@@ -215,7 +217,10 @@ class classify():
 		t_start = time.clock()
 		output = self.model(input_data)
 		pred_y = int(torch.max(output, 1)[1].cpu().data.numpy())
-		#print "prediction time taken = ", time.clock() - t_start
+		t_duration = float(time.clock() - t_start)
+		self.t_sum += t_duration
+		self.count += 1
+		print "prediction time taken = ", t_duration/self.count
 		#print "Predict: ", self.labels[output_max_class]
 		#print output_prob[output_max_class]
 		#if output_prob[output_max_class]<0.7:
