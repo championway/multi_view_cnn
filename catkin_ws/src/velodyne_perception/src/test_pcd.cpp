@@ -31,6 +31,7 @@ POINT_CLOUD_REGISTER_POINT_STRUCT (PointCloudLabel,           // here we assume 
 int main(int argc, char** argv){
 	//pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
 	pcl::PointCloud<PointCloudLabel>::Ptr cloud(new pcl::PointCloud<PointCloudLabel>);
+	pcl::PointCloud<PointCloudLabel>::Ptr label_cloud(new pcl::PointCloud<PointCloudLabel>);
 	// Read a PCD file from disk.
 	if (pcl::io::loadPCDFile<PointCloudLabel>(argv[1], *cloud) != 0)
 	{
@@ -66,6 +67,12 @@ int main(int argc, char** argv){
     srand( time(NULL) );
     int a[3][2];
     std::cout << sqrt(pow(4.0, 2)) << std::endl;
+    std::string test[3] = {"aa","bbb","ccc"};
+    label_cloud->points.resize (2);
+  	label_cloud->width = 2;
+  	label_cloud->height = 1;
+  	label_cloud->points[0].x = label_cloud->points[0].y = label_cloud->points[0].z = 1;
+	label_cloud->points[1].x = label_cloud->points[2].y = label_cloud->points[3].z = 5;
 	//std::cout << cloud->points[2].z << std::endl;
 	//std::cout << int(cloud->points[2].rgba) << std::endl;
 	//std::cout << int(cloud->points[2].g) << std::endl;
@@ -100,7 +107,7 @@ int main(int argc, char** argv){
     }*/
     std::cout << "finish" << std::endl;
   
-  	pcl::io::savePCDFileASCII ("Hi.pcd", *cloud);
+  	pcl::io::savePCDFileASCII ("Hi.pcd", *label_cloud);
   	std::cerr << "Saved " << cloud->points.size () << " data points to Hi.pcd." << std::endl;
 
 }

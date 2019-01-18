@@ -124,6 +124,11 @@ visualization_msgs::MarkerArray marker_array;
 visualization_msgs::MarkerArray marker_array_line;
 ros::Time pcl_t;
 
+int MODEL_NUM = 4;
+std::string model_id[4] = {"totem1", "totem2", "totem3", "totem4"};
+int class_dic[4] = {1, 1, 2, 2};
+int pos_arr[4][2];
+
 //declare function
 void cloud_cb(const sensor_msgs::PointCloud2ConstPtr&); //point cloud subscriber call back function
 void cluster_pointcloud(void); //point cloud clustering
@@ -177,12 +182,9 @@ void set_gazebo_world(std::string model_name, int x, int y)
 
 void auto_label()
 {
-	int MODEL_NUM = 4;
-	int pos_arr[MODEL_NUM][2];
 	int RAND_RANGE = 20;
 	float COLLISION_DIS = 5;
 	float WAMV_RANGE = 5;
-	std::string model_id[MODEL_NUM] = {"totem1", "totem2", "totem3", "totem4"};
 	srand(time(NULL));
 	for(int i = 0; i < MODEL_NUM; i++)
 	{
@@ -228,7 +230,49 @@ void cluster_pointcloud()
   // apply filter
   outrem.filter (*cloud_filtered);
 
-  //========== Point Cloud Clustering ==========
+  //========== Auto Labeling ==========
+  auto_label();
+  ros::Duration(5).sleep();
+  label_cloud->points.resize(cloud_filtered->points.size());
+  label_cloud->width = cloud_filtered->width;
+  label_cloud->height = cloud_filtered->height;
+  for(size_t idx = 0; idx < cloud_filtered->points.size(); ++idx)
+  {
+  	float x = cloud_filtered->points[idx].x;
+  	float y = cloud_filtered->points[idx].y;
+  	float z = cloud_filtered->points[idx].z;
+  	float min_dis = 100000000;
+  	int min_idx;
+  	for(int i = 0; i < MODEL_NUM; i++)
+  	{
+  		float dis = sqrt(pow((x-pos_arr[i][0]), 2) + pow((y-pos_arr[i][1]), 2));
+  		if(min_dis > dis)
+  		{
+  			min_dis = dis;
+  			min_idx = i;
+  		}
+  	}
+  	
+  	label_cloud->points[idx].x = x;
+  	label_cloud->points[idx].y = y;
+  	label_cloud->points[idx].z = z;
+  	label_cloud->points[idx].label = class_dic[min_idx];
+  	if (label_cloud->points[idx].label == 1)
+  	{
+  		label_cloud->points[idx].r = 255;
+  		label_cloud->points[idx].g = 0;
+  		label_cloud->points[idx].b = 0;
+  	}
+  	else if (label_cloud->points[idx].label == 2)
+  	{
+  		label_cloud->points[idx].r = 0;
+  		label_cloud->points[idx].g = 255;
+  		label_cloud->points[idx].b = 0;
+  	}
+  }
+  ros::Duration(5).sleep();
+
+  //========== Point Cloud Clusterlabeling ==========
   // Declare variable
   int num_cluster = 0;
   int start_index = 0;
@@ -249,7 +293,7 @@ void cluster_pointcloud()
   ec.setSearchMethod (tree);
   ec.setInputCloud (cloud_filtered);
   ec.extract (cluster_indices);
-  
+
   for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin (); it != cluster_indices.end (); ++it)
   {
     // Declare variable
@@ -353,8 +397,6 @@ void cluster_pointcloud()
     //ob_pose.r = 1;
     ob_list.list.push_back(ob_pose);
     start_index = result->points.size();
-    auto_label();
-  	ros::Duration(10).sleep();
   }
 
   //set obstacle list
@@ -385,6 +427,13 @@ void cluster_pointcloud()
   pub_result.publish(ros_out);
   lock = false;
   result->clear();
+
+
+  std::cout << "Save PDC file======" << std::endl;
+  pcl::io::savePCDFile("/home/arg_ws3/multi_view_cnn/catkin_ws/label.pcd", *label_cloud);
+  std::cout << "Save PDC file" << std::endl;
+  label_cloud->clear();
+
   //std::cout << "Finish" << std::endl << std::endl; 
 }
 
@@ -531,7 +580,7 @@ int main (int argc, char** argv)
   tf::TransformListener listener(ros::Duration(1.0));
   if (visual)
     std::cout<< "Start to clustering" << std::endl;
-  ros::Subscriber sub = nh.subscribe<sensor_msgs::PointCloud2> ("velodyne_points", 1, callback);
+  ros::Subscriber sub = nh.subscribe<sensor_msgs::PointCloud2> ("/pcl_preprocessing/velodyne_points_preprocess", 1, callback);
   // Create a ROS publisher for the output point cloud
   pub_obstacle = nh.advertise< robotx_msgs::ObstaclePoseList > ("/obstacle_list", 1);
   pub_object = nh.advertise< robotx_msgs::ObjectPoseList > ("/obj_list", 1);
