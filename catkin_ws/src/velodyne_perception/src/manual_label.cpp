@@ -130,14 +130,14 @@ visualization_msgs::MarkerArray marker_array;
 visualization_msgs::MarkerArray marker_array_line;
 ros::Time pcl_t;
 
-int MODEL_NUM = 4;
-std::string model_id[4] = {"dock1", "dock2", "light_buoy", "buoy_s"};
-int class_dic[4] = {3, 3, 2, 4};
-float z_height[4] = {0, 0, 0.32, 0.23};
-float new_pos_arr[4][2];
-float new_pos_arr_tf[4][2];
-float pos_arr[4][2];
-float pos_arr_tf[4][2];
+int MODEL_NUM = 2;
+std::string model_id[2] = {"dock1", "dock2"};
+int class_dic[2] = {3, 3};
+float z_height[2] = {0, 0};
+float new_pos_arr[2][2];
+float new_pos_arr_tf[2][2];
+float pos_arr[2][2];
+float pos_arr_tf[2][2];
 bool first = true;
 int pcd_count = 601;
 
@@ -145,7 +145,7 @@ int pcd_count = 601;
 void cloud_cb(const sensor_msgs::PointCloud2ConstPtr&); //point cloud subscriber call back function
 void cluster_pointcloud(void); //point cloud clustering
 void set_gazebo_world(std::string model_name, int x, int y, float z);
-void get_model_state(std::string model_name);
+geometry_msgs::Pose get_model_state(std::string model_name);
 void auto_label(void);
 void drawRviz(robotx_msgs::ObstaclePoseList); //draw marker in Rviz
 void drawRviz_line(robotx_msgs::ObstaclePoseList); //draw marker line list in Rviz
@@ -169,29 +169,29 @@ void callback(const sensor_msgs::PointCloud2ConstPtr& input)
     for (size_t i = 0; i < cloud_in->points.size(); i++){
       if (cloud_in->points[i].y > 0)
       {
-      	cloud_in->points[i].r = 255;
-      	cloud_in->points[i].g = 0;
-      	cloud_in->points[i].b = 255;
+        cloud_in->points[i].r = 255;
+        cloud_in->points[i].g = 0;
+        cloud_in->points[i].b = 255;
       }
       else
       {
-      	cloud_in->points[i].r = 0;
-      	cloud_in->points[i].g = 255;
-      	cloud_in->points[i].b = 0;
+        cloud_in->points[i].r = 0;
+        cloud_in->points[i].g = 255;
+        cloud_in->points[i].b = 0;
       }
       
     }
     clock_t t_start = clock();
 
     std::string source_frame="/velodyne";
-	std::string target_frame="/base_link";
-	try{
-		lr->lookupTransform(source_frame, target_frame, ros::Time(), tf_transform);
-	} 	
-	catch (tf::TransformException ex) {
-		ROS_INFO("Can't find transfrom betwen [%s] and [%s] ", source_frame.c_str(), target_frame.c_str());		
-		return;
-	}
+  std::string target_frame="/base_link";
+  try{
+    lr->lookupTransform(source_frame, target_frame, ros::Time(), tf_transform);
+  }   
+  catch (tf::TransformException ex) {
+    ROS_INFO("Can't find transfrom betwen [%s] and [%s] ", source_frame.c_str(), target_frame.c_str());   
+    return;
+  }
     cluster_pointcloud();
     clock_t t_end = clock();
     //std::cout << "Pointcloud cluster time taken = " << (t_end-t_start)/(double)(CLOCKS_PER_SEC) << std::endl;
@@ -202,31 +202,31 @@ void callback(const sensor_msgs::PointCloud2ConstPtr& input)
 
 }
 
-void get_model_state(std::string model_name)
+geometry_msgs::Pose get_model_state(std::string model_name)
 {
-  gazebo_msgs::ModelState modelstate;
-  //modelstate.model_name = (std::string) model_name;
-
   gazebo_msgs::GetModelState getmodelstate;
   getmodelstate.request.model_name = model_name;
   get_client.call(getmodelstate);
+  geometry_msgs::Pose p;
+  p = getmodelstate.response.pose;
+  return p;
 }
 
 void set_gazebo_world(std::string model_name, int x, int y, float z)
 {
-	gazebo_msgs::ModelState modelstate;
+  gazebo_msgs::ModelState modelstate;
     modelstate.model_name = (std::string) model_name;
     modelstate.pose.position.x = x;
     modelstate.pose.position.y = y;
     modelstate.pose.position.z = z;
     /*if (model_name == "wamv")
     {
-    	tf2::Quaternion quat;
-    	quat.setRPY(0, 0, 3.14);
-    	modelstate.pose.orientation.x = quat[0];
-    	modelstate.pose.orientation.y = quat[1];
-    	modelstate.pose.orientation.z = quat[2];
-    	modelstate.pose.orientation.w = quat[3];
+      tf2::Quaternion quat;
+      quat.setRPY(0, 0, 3.14);
+      modelstate.pose.orientation.x = quat[0];
+      modelstate.pose.orientation.y = quat[1];
+      modelstate.pose.orientation.z = quat[2];
+      modelstate.pose.orientation.w = quat[3];
     }*/
     
     gazebo_msgs::SetModelState setmodelstate;
@@ -236,49 +236,26 @@ void set_gazebo_world(std::string model_name, int x, int y, float z)
 
 void auto_label()
 {
-	int RAND_RANGE = 40;
-	float COLLISION_DIS = 8;
-	float WAMV_RANGE = 5;
-	srand(time(NULL));
-	for(int i = 0; i < MODEL_NUM; i++)
-	{
-		bool model_collision = true;
-		//To get both positive and negetive value
-		int x = (int)(rand()%RAND_RANGE*2 + 1) - RAND_RANGE;
-		int y = (int)(rand()%RAND_RANGE*2 + 1) - RAND_RANGE;
-		new_pos_arr[i][0] = x;
-		new_pos_arr[i][1] = y;
-		while(model_collision)
-		{
-			model_collision = false;
-			x = (int)(rand()%RAND_RANGE*2 + 1) - RAND_RANGE;
-			y = (int)(rand()%RAND_RANGE*2 + 1) - RAND_RANGE;
-			new_pos_arr[i][0] = x;
-			new_pos_arr[i][1] = y;
+  int RAND_RANGE = 40;
+  float COLLISION_DIS = 8;
+  float WAMV_RANGE = 5;
+  srand(time(NULL));
+  for(int i = 0; i < MODEL_NUM; i++)
+  {
+    //To get both positive and negetive
+    geometry_msgs::Pose p;
+    p = get_model_state(model_id[i]);
+    new_pos_arr[i][0] = p.position.x;
+    new_pos_arr[i][1] = p.position.y;
 
-			if (sqrt(pow(x, 2) + pow(y, 2)) < WAMV_RANGE){model_collision = true;};
-			float dis;
-			for(int j = 0; j < i; j++)
-			{
-				dis = sqrt(pow((new_pos_arr[j][0]-new_pos_arr[i][0]), 2) + pow((new_pos_arr[j][1]-new_pos_arr[i][1]), 2));
-				if (dis < COLLISION_DIS){model_collision = true;}
-			}
-		}
-		set_gazebo_world(model_id[i], x, y, z_height[i]);
-		tf::Quaternion quat = tf_transform.getRotation();
-  		tf::Matrix3x3 tf_rot(quat);
-  		tf::Vector3 pos(x, y, 0);
-  		//std::cout << tf_rot[0][0] << "," << tf_rot[0][1] << "," << tf_rot[0][2] << std::endl;
-  		//std::cout << pos[0] << "," << pos[1] << "," << pos[2] << std::endl;
-  		tf::Vector3 tf_pos = tf_rot * pos;
-  		//std::cout << tf_pos[0] << "," << tf_pos[1] << "," << tf_pos[2] << std::endl;
-  		//std::cout << std::endl;
-  		new_pos_arr_tf[i][0] = tf_pos[0];
-  		new_pos_arr_tf[i][1] = tf_pos[1];
-  		//double roll, pitch, yaw;
-  		//tf_rot.getRPY(roll, pitch, yaw); //get RPY and assign to roll, pitch ,yaw
-	}
-	set_gazebo_world("wamv", 0, 0, -0.0823);
+    tf::Quaternion quat = tf_transform.getRotation();
+    tf::Matrix3x3 tf_rot(quat);
+    tf::Vector3 pos(p.position.x, p.position.y, 0);
+    tf::Vector3 tf_pos = tf_rot * pos;
+    new_pos_arr_tf[i][0] = tf_pos[0];
+    new_pos_arr_tf[i][1] = tf_pos[1];
+  }
+  set_gazebo_world("wamv", 0, 0, -0.0823);
 }
 
 //void cloud_cb(const sensor_msgs::PointCloud2ConstPtr& input)
@@ -299,15 +276,15 @@ void cluster_pointcloud()
   //========== Auto Labeling ==========
   for (int i = 0; i < MODEL_NUM; i++)
   {
-  	for (int j = 0; j < 2; j++)
-  	{
-  		pos_arr_tf[i][j] = new_pos_arr_tf[i][j];
-  	}
+    for (int j = 0; j < 2; j++)
+    {
+      pos_arr_tf[i][j] = new_pos_arr_tf[i][j];
+    }
   }
   auto_label();
   //for(int i = 0; i < MODEL_NUM; i++)
   //{
-  //	std::cout << pos_arr_tf[i][0] << ", " << pos_arr_tf[i][1] << std::endl;
+  //  std::cout << pos_arr_tf[i][0] << ", " << pos_arr_tf[i][1] << std::endl;
   //}
 
   //pcl::toROSMsg(*cloud_in, ros_out);
@@ -315,12 +292,12 @@ void cluster_pointcloud()
   //ros_out.header.stamp = ros::Time::now();
   //pub_result.publish(ros_out);
 
-  ros::Duration(5).sleep();
+  ros::Duration(3).sleep();
   if (first)
   {
-  	first = false;
-  	lock = false;
-  	return;
+    first = false;
+    lock = false;
+    return;
   }
 
   label_cloud->points.resize(cloud_filtered->points.size());
@@ -329,63 +306,63 @@ void cluster_pointcloud()
   
   for(size_t idx = 0; idx < cloud_filtered->points.size(); ++idx)
   {
-  	float x = cloud_filtered->points[idx].x;
-  	float y = cloud_filtered->points[idx].y;
-  	float z = cloud_filtered->points[idx].z;
-  	float min_dis = 100000000;
-  	int min_idx;
-  	for(int i = 0; i < MODEL_NUM; i++)
-  	{
-  		
-  		float dis = sqrt(pow((x-pos_arr_tf[i][0]), 2) + pow((y-pos_arr_tf[i][1]), 2));
-  		//float dis = sqrt(pow((x+pos_arr[i][1]), 2) + pow((y-pos_arr[i][0]), 2));
-  		if(min_dis > dis)
-  		{
-  			min_dis = dis;
-  			min_idx = i;
-  		}
-  	}
-  	
-  	label_cloud->points[idx].x = x;
-  	label_cloud->points[idx].y = y;
-  	label_cloud->points[idx].z = z;
-  	label_cloud->points[idx].label = class_dic[min_idx];
-  	if (label_cloud->points[idx].label == 1)
-  	{
-  		label_cloud->points[idx].r = 0;
-  		label_cloud->points[idx].g = 255;
-  		label_cloud->points[idx].b = 0;
-  	}
-  	else if (label_cloud->points[idx].label == 2)
-  	{
-  		label_cloud->points[idx].r = 255;
-  		label_cloud->points[idx].g = 255;
-  		label_cloud->points[idx].b = 0;
-  	}
-  	else if (label_cloud->points[idx].label == 3)
-  	{
-  		label_cloud->points[idx].r = 255;
-  		label_cloud->points[idx].g = 255;
-  		label_cloud->points[idx].b = 255;
-  	}
-  	else if (label_cloud->points[idx].label == 4)
-  	{
-  		label_cloud->points[idx].r = 0;
-  		label_cloud->points[idx].g = 0;
-  		label_cloud->points[idx].b = 255;
-  	}
-  	else if (label_cloud->points[idx].label == 5)
-  	{
-  		label_cloud->points[idx].r = 0;
-  		label_cloud->points[idx].g = 0;
-  		label_cloud->points[idx].b = 255;
-  	}
-  	else if (label_cloud->points[idx].label == 6)
-  	{
-  		label_cloud->points[idx].r = 0;
-  		label_cloud->points[idx].g = 0;
-  		label_cloud->points[idx].b = 255;
-  	}
+    float x = cloud_filtered->points[idx].x;
+    float y = cloud_filtered->points[idx].y;
+    float z = cloud_filtered->points[idx].z;
+    float min_dis = 100000000;
+    int min_idx;
+    for(int i = 0; i < MODEL_NUM; i++)
+    {
+      
+      float dis = sqrt(pow((x-pos_arr_tf[i][0]), 2) + pow((y-pos_arr_tf[i][1]), 2));
+      //float dis = sqrt(pow((x+pos_arr[i][1]), 2) + pow((y-pos_arr[i][0]), 2));
+      if(min_dis > dis)
+      {
+        min_dis = dis;
+        min_idx = i;
+      }
+    }
+    
+    label_cloud->points[idx].x = x;
+    label_cloud->points[idx].y = y;
+    label_cloud->points[idx].z = z;
+    label_cloud->points[idx].label = class_dic[min_idx];
+    if (label_cloud->points[idx].label == 1)
+    {
+      label_cloud->points[idx].r = 0;
+      label_cloud->points[idx].g = 255;
+      label_cloud->points[idx].b = 0;
+    }
+    else if (label_cloud->points[idx].label == 2)
+    {
+      label_cloud->points[idx].r = 255;
+      label_cloud->points[idx].g = 255;
+      label_cloud->points[idx].b = 0;
+    }
+    else if (label_cloud->points[idx].label == 3)
+    {
+      label_cloud->points[idx].r = 255;
+      label_cloud->points[idx].g = 255;
+      label_cloud->points[idx].b = 255;
+    }
+    else if (label_cloud->points[idx].label == 4)
+    {
+      label_cloud->points[idx].r = 0;
+      label_cloud->points[idx].g = 0;
+      label_cloud->points[idx].b = 255;
+    }
+    else if (label_cloud->points[idx].label == 5)
+    {
+      label_cloud->points[idx].r = 0;
+      label_cloud->points[idx].g = 0;
+      label_cloud->points[idx].b = 255;
+    }
+    else if (label_cloud->points[idx].label == 6)
+    {
+      label_cloud->points[idx].r = 0;
+      label_cloud->points[idx].g = 0;
+      label_cloud->points[idx].b = 255;
+    }
   }
 
   std::ostringstream oss;
@@ -393,16 +370,16 @@ void cluster_pointcloud()
   std::string file_name = oss.str();
   if (label_cloud->points.size()!=0)
   {
-  	pcl::io::savePCDFile(file_name, *label_cloud);
-  	std::cout << "Save PDC file: " << pcd_count << ".pcd" << std::endl;
-  	pcd_count++;
-  	label_cloud->clear();
+    pcl::io::savePCDFile(file_name, *label_cloud);
+    std::cout << "Save PDC file: " << pcd_count << ".pcd" << std::endl;
+    pcd_count++;
+    label_cloud->clear();
   }
 
   if (pcd_count > 800)
   {
-  	std::cout << "Finish Auto Labeling" << std::endl;
-  	ros::shutdown();
+    std::cout << "Finish Auto Labeling" << std::endl;
+    ros::shutdown();
   }
 
   /*

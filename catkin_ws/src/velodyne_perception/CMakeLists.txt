@@ -61,3 +61,6 @@ target_link_libraries(test_pcd ${catkin_LIBRARIES})
 
 add_executable(auto_labeling src/auto_labeling.cpp)
 target_link_libraries(auto_labeling ${catkin_LIBRARIES})
+
+add_executable(manual_label src/manual_label.cpp)
+target_link_libraries(manual_label ${catkin_LIBRARIES})
