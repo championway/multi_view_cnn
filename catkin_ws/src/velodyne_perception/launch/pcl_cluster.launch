@@ -2,7 +2,7 @@
 <launch>
 	<arg name="visual" default="true"/>
     <!-- PointCloud Cluster -->
-    <node name="pcl_cluster" pkg="velodyne_perception" type="manual_label"  output="screen" clear_params="true" required="true">
+    <node name="pcl_cluster" pkg="velodyne_perception" type="add_point"  output="screen" clear_params="true" required="true">
     	<param name="visual" value="$(arg visual)"/>
     </node>
 </launch>

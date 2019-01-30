@@ -64,3 +64,6 @@ target_link_libraries(auto_labeling ${catkin_LIBRARIES})
 
 add_executable(manual_label src/manual_label.cpp)
 target_link_libraries(manual_label ${catkin_LIBRARIES})
+
+add_executable(add_point src/add_point.cpp)
+target_link_libraries(add_point ${catkin_LIBRARIES})
