@@ -14,3 +14,4 @@ catkin_ws/.catkin_workspace
 *.caffemodel
 *.pth
 .ipynb_checkpoints/
+!pictures/*
