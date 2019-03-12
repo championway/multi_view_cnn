@@ -12,4 +12,4 @@ This project not only been tested in the simulator(Gazebo) but also use in 2018 
 - ROS Kinetic
 - Pytorch 4.0
 
-[![Link to my YouTube video!](https://raw.githubusercontent.com/EdjeElectronics/TensorFlow-Object-Detection-API-Tutorial-Train-Multiple-Objects-Windows-10/master/doc/YouTube%20video.jpg)](https://www.youtube.com/watch?v=-llRCISkNYE&t=1s)
+[![](https://github.com/championway/multi_view_cnn/blob/master/pictures/youtube.png)](https://www.youtube.com/watch?v=-llRCISkNYE&t=1s)
