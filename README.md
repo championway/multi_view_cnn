@@ -12,4 +12,4 @@ This project not only been tested in the simulator(Gazebo) but also use in 2018 
 - ROS Kinetic
 - Pytorch 4.0
 
-[![](https://github.com/championway/multi_view_cnn/blob/master/pictures/youtube.png)](https://www.youtube.com/watch?v=-llRCISkNYE&t=1s)
+[![](https://github.com/championway/multi_view_cnn/blob/master/pictures/youtube_cover.png)](https://www.youtube.com/watch?v=-llRCISkNYE&t=1s)
